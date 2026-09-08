@@ -1,26 +1,9 @@
--- ============================================================
--- CampusTrace — Database Schema (Phase 1: Foundation)
--- Engine: MySQL 8+
--- Design notes:
---   - division_id is threaded through as a FK everywhere it's
---     relevant so scaling to more divisions/an entire institution
---     needs no schema changes (per methodology.md).
---   - Composite indexes are added on every table that will be
---     queried by (room, date/slot) or (user, date) at scale —
---     presence and contact_edge in particular, since these are
---     built by nightly batch jobs and read by tracing.
---   - InnoDB everywhere for FK support and transactions.
--- ============================================================
-
 CREATE DATABASE IF NOT EXISTS campustrace;
 USE campustrace;
 
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ------------------------------------------------------------
--- Core organizational structure
--- ------------------------------------------------------------
 
 CREATE TABLE divisions (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -49,7 +32,6 @@ CREATE TABLE courses (
     INDEX idx_course_division (division_id)
 ) ENGINE=InnoDB;
 
--- Batches only matter for lab/tutorial courses (theory needs no batch split)
 CREATE TABLE batches (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     course_id       INT UNSIGNED NOT NULL,
@@ -58,10 +40,6 @@ CREATE TABLE batches (
     UNIQUE KEY uq_batch_course_name (course_id, name)
 ) ENGINE=InnoDB;
 
--- ------------------------------------------------------------
--- Users & RBAC
--- ------------------------------------------------------------
-
 CREATE TABLE users (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(150) NOT NULL,
@@ -69,8 +47,7 @@ CREATE TABLE users (
     password_hash   VARCHAR(255) NOT NULL,
     role            ENUM('student','course_faculty','class_teacher',
                           'health_admin','institute_admin') NOT NULL,
-    -- Only meaningful for students and class_teacher; faculty use
-    -- faculty_course_assignments below since they can span divisions.
+
     division_id     INT UNSIGNED NULL,
     is_active        BOOLEAN NOT NULL DEFAULT TRUE,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -80,8 +57,6 @@ CREATE TABLE users (
     INDEX idx_user_division (division_id)
 ) ENGINE=InnoDB;
 
--- Faculty can teach courses across divisions — this table is what
--- makes cross-division bridging (Phase 2) queryable without a schema change.
 CREATE TABLE faculty_course_assignments (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     faculty_id      INT UNSIGNED NOT NULL,
@@ -92,8 +67,6 @@ CREATE TABLE faculty_course_assignments (
     INDEX idx_fca_course (course_id)
 ) ENGINE=InnoDB;
 
--- Student registration: division fixed at registration; batch chosen
--- per lab/tutorial course only (NULL batch_id for theory courses).
 CREATE TABLE enrollments (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     student_id      INT UNSIGNED NOT NULL,
@@ -105,10 +78,6 @@ CREATE TABLE enrollments (
     UNIQUE KEY uq_enrollment (student_id, course_id),
     INDEX idx_enrollment_course_batch (course_id, batch_id)
 ) ENGINE=InnoDB;
-
--- ------------------------------------------------------------
--- Timetable
--- ------------------------------------------------------------
 
 CREATE TABLE timetable_slots (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -126,11 +95,6 @@ CREATE TABLE timetable_slots (
     INDEX idx_slot_course (course_id)
 ) ENGINE=InnoDB;
 
--- ------------------------------------------------------------
--- Presence & contact graph
--- (generated: TimetableSlot + Enrollment -> Presence -> ContactEdge)
--- ------------------------------------------------------------
-
 CREATE TABLE presence (
     id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id         INT UNSIGNED NOT NULL,
@@ -143,8 +107,7 @@ CREATE TABLE presence (
     FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
     FOREIGN KEY (slot_id) REFERENCES timetable_slots(id) ON DELETE CASCADE,
     UNIQUE KEY uq_presence (user_id, slot_id, presence_date),
-    -- Critical for graph_builder.py: pull everyone in a room+slot+date
-    -- as one bounded query per (room, slot, date) rather than a full scan.
+    
     INDEX idx_presence_room_slot_date (room_id, slot_id, presence_date),
     INDEX idx_presence_user_date (user_id, presence_date)
 ) ENGINE=InnoDB;
@@ -161,15 +124,11 @@ CREATE TABLE contact_edges (
     FOREIGN KEY (user_b_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
     UNIQUE KEY uq_edge (user_a_id, user_b_id, contact_date, room_id),
-    -- These two indexes are what tracing_service.py's BFS/DFS will hit
-    -- for every step — one per traversal direction, scoped by recency.
+  
     INDEX idx_edge_a_date (user_a_id, contact_date),
     INDEX idx_edge_b_date (user_b_id, contact_date)
 ) ENGINE=InnoDB;
 
--- ------------------------------------------------------------
--- Disease knowledge base & health reporting
--- ------------------------------------------------------------
 
 CREATE TABLE disease_kb (
     id                      INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -218,9 +177,6 @@ CREATE TABLE absence_flags (
     INDEX idx_absence_state (state)
 ) ENGINE=InnoDB;
 
--- ------------------------------------------------------------
--- Alerts & feedback loop
--- ------------------------------------------------------------
 
 CREATE TABLE alerts (
     id                      BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -250,9 +206,6 @@ CREATE TABLE feedback (
     UNIQUE KEY uq_feedback_alert (alert_id)
 ) ENGINE=InnoDB;
 
--- ------------------------------------------------------------
--- Capacity / isolation allocation
--- ------------------------------------------------------------
 
 CREATE TABLE capacity (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -274,9 +227,6 @@ CREATE TABLE isolation_allocations (
     INDEX idx_isolation_active (capacity_id, released_at)
 ) ENGINE=InnoDB;
 
--- ------------------------------------------------------------
--- System configuration & audit
--- ------------------------------------------------------------
 
 CREATE TABLE system_config (
     id                      TINYINT UNSIGNED PRIMARY KEY DEFAULT 1,
@@ -298,8 +248,7 @@ CREATE TABLE audit_log (
     details         JSON NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    -- Audit log grows unbounded — index by actor and time for the
-    -- institute_admin audit viewer, which will always filter by these.
+
     INDEX idx_audit_user_date (user_id, created_at),
     INDEX idx_audit_action_date (action, created_at)
 ) ENGINE=InnoDB;
