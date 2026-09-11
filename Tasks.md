@@ -5,31 +5,31 @@
 ```
 campustrace/
 ├── database/
-│   └── schema.sql                          [Person 1]
+│   └── schema.sql                          [Person 1]                                          ## done
 │
 ├── backend/
 │   ├── app/
-│   │   ├── __init__.py                     [Person 1] app factory, blueprint registration
-│   │   ├── config.py                       [Person 1] DB URI, secret key, env config
-│   │   ├── extensions.py                   [Person 1] db, bcrypt, jwt manager init
+│   │   ├── __init__.py                     [Person 1] app factory, blueprint registration      ## done
+│   │   ├── config.py                       [Person 1] DB URI, secret key, env config           ## done
+│   │   ├── extensions.py                   [Person 1] db, bcrypt, jwt manager init             ## done
 │   │   │
 │   │   ├── auth/
-│   │   │   ├── routes.py                   [Person 1] /auth/register, /auth/login
-│   │   │   └── rbac.py                     [Person 1] @role_required decorator
+│   │   │   ├── routes.py                   [Person 1] /auth/register, /auth/login              ## done              
+│   │   │   └── rbac.py                     [Person 1] @role_required decorator                 ## done
 │   │   │
 │   │   ├── models/
-│   │   │   ├── user.py                     [Person 1]
-│   │   │   ├── division.py                 [Person 1]
-│   │   │   ├── timetable.py                [Person 1]
-│   │   │   ├── enrollment.py               [Person 1]
-│   │   │   ├── health_record.py            [Person 1] (schema owner; fields used by P2–P4)
-│   │   │   ├── absence_flag.py             [Person 1]
-│   │   │   ├── disease_kb.py               [Person 1]
-│   │   │   ├── contact_edge.py             [Person 1]
-│   │   │   ├── alert.py                    [Person 1]
-│   │   │   ├── feedback.py                 [Person 1]
-│   │   │   ├── capacity.py                 [Person 1]
-│   │   │   └── audit_log.py                [Person 1]
+│   │   │   ├── user.py                     [Person 1]                                          ## done
+│   │   │   ├── division.py                 [Person 1]                                          ## done
+│   │   │   ├── timetable.py                [Person 1]                                          ## done
+│   │   │   ├── enrollment.py               [Person 1]                                          ## done
+│   │   │   ├── health_record.py            [Person 1] (schema owner; fields used by P2–P4)     ## done
+│   │   │   ├── absence_flag.py             [Person 1]                                          ## done
+│   │   │   ├── disease_kb.py               [Person 1]                                          ## done
+│   │   │   ├── contact_edge.py             [Person 1]                                          ## done
+│   │   │   ├── alert.py                    [Person 1]                                          ## done
+│   │   │   ├── feedback.py                 [Person 1]                                          ## done
+│   │   │   ├── capacity.py                 [Person 1]                                          ## done
+│   │   │   └── audit_log.py                [Person 1]                                          ## done
 │   │   │
 │   │   ├── graph/
 │   │   │   ├── graph.py                    [Person 1] Graph class (adjacency list)
