@@ -28,6 +28,15 @@ def create_app(config_name: str = "development") -> Flask:
     _register_blueprints(app)
     _register_health_check(app)
 
+    # Import models so SQLAlchemy's metadata is complete before anything
+    # calls db.create_all() or Alembic autogenerate runs against this app.
+    # NOTE: `import app.models` here would rebind the local name `app`
+    # to the package itself (shadowing the Flask instance below it),
+    # since Python treats a dotted import's first segment as a local
+    # assignment target. `from app import models` avoids that trap.
+    with app.app_context():
+        from app import models  # noqa: F401
+
     return app
 
 
@@ -40,8 +49,8 @@ def _init_extensions(app: Flask) -> None:
 
 def _register_blueprints(app: Flask) -> None:
     # --- Person 1: auth ---
-    # from app.auth.routes import auth_bp
-    # app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    from app.auth.routes import auth_bp
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
     # --- Person 2: student ---
     # from app.routes.student import student_bp
