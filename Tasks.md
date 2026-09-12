@@ -32,11 +32,11 @@ campustrace/
 │   │   │   └── audit_log.py                [Person 1]                                          ## done
 │   │   │
 │   │   ├── graph/
-│   │   │   ├── graph.py                    [Person 1] Graph class (adjacency list)
-│   │   │   ├── traversal.py                [Person 1] BFS/DFS forward + backward
-│   │   │   ├── union_find.py               [Person 1] Disjoint Set, path compression
-│   │   │   ├── risk_engine.py              [Person 1] weighted scoring formula
-│   │   │   └── priority_queue.py           [Person 1] heap for capacity allocation
+│   │   │   ├── graph.py                    [Person 1] Graph class (adjacency list)             ## done
+│   │   │   ├── traversal.py                [Person 1] BFS/DFS forward + backward               ## done
+│   │   │   ├── union_find.py               [Person 1] Disjoint Set, path compression           ## done
+│   │   │   ├── risk_engine.py              [Person 1] weighted scoring formula                 ## done
+│   │   │   └── priority_queue.py           [Person 1] heap for capacity allocation             ## done
 │   │   │
 │   │   ├── services/
 │   │   │   ├── presence_builder.py         [Person 1] Timetable+Enrollment → Presence
