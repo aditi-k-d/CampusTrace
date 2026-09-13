@@ -39,10 +39,10 @@ campustrace/
 │   │   │   └── priority_queue.py           [Person 1] heap for capacity allocation             ## done
 │   │   │
 │   │   ├── services/
-│   │   │   ├── presence_builder.py         [Person 1] Timetable+Enrollment → Presence
-│   │   │   ├── graph_builder.py            [Person 1] Presence → ContactEdge
-│   │   │   ├── tracing_service.py          [Person 1] wraps traversal.py for routes to call
-│   │   │   ├── alert_service.py            [Person 1] generates Alert rows from tracing results
+│   │   │   ├── presence_builder.py         [Person 1] Timetable+Enrollment → Presence          ## done
+│   │   │   ├── graph_builder.py            [Person 1] Presence → ContactEdge                   ## done
+│   │   │   ├── tracing_service.py          [Person 1] wraps traversal.py for routes to call    ## done
+│   │   │   ├── alert_service.py            [Person 1] generate Alert rows from tracing results ## done
 │   │   │   ├── disease_kb_service.py       [Person 4] symptom-matching, KB CRUD
 │   │   │   └── capacity_service.py         [Person 4] bed allocation logic (uses priority_queue.py)
 │   │   │
