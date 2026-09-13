@@ -54,8 +54,8 @@ campustrace/
 │   │   │   └── institute_admin.py          [Person 4]
 │   │   │
 │   │   └── tests/
-│   │       ├── test_graph.py               [Person 1]
-│   │       ├── test_auth.py                [Person 1]
+│   │       ├── test_graph.py               [Person 1]                                          ## done
+│   │       ├── test_auth.py                [Person 1]                                          ## done
 │   │       ├── test_student_routes.py      [Person 2]
 │   │       ├── test_faculty_routes.py      [Person 3]
 │   │       └── test_admin_routes.py        [Person 4]
@@ -65,15 +65,15 @@ campustrace/
 ├── frontend/
 │   └── src/
 │       ├── api/
-│       │   ├── client.js                   [Person 1] axios instance, base URL, token header
+│       │   ├── client.js                   [Person 1] axios instance, base URL, token header   ## done
 │       │   ├── studentApi.js               [Person 2]
 │       │   ├── facultyApi.js               [Person 3]
 │       │   └── adminApi.js                 [Person 4]
 │       │
 │       ├── auth/
-│       │   ├── Login.jsx                   [Person 1]
-│       │   ├── Register.jsx                [Person 1]
-│       │   └── ProtectedRoute.jsx          [Person 1] role-based route guard
+│       │   ├── Login.jsx                   [Person 1]                                          ## done
+│       │   ├── Register.jsx                [Person 1]                                          ## done
+│       │   └── ProtectedRoute.jsx          [Person 1] role-based route guard                   ## done
 │       │
 │       ├── components/
 │       │   ├── student/                    [Person 2] self-report form, alert card, self-assessment
@@ -87,7 +87,7 @@ campustrace/
 │       │   ├── HealthAdminDashboard.jsx    [Person 4]
 │       │   └── InstituteAdminDashboard.jsx [Person 4]
 │       │
-│       └── App.jsx                         [Person 1 sets up routing shell; P2–P4 each add their own route line]
+│       └── App.jsx                         [Person 1 sets up routing shell; P2–P4 each add their own route line] ## done
 │
 └── docs/
     ├── project_overview.md                 [Person 1]
