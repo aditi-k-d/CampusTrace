@@ -29,8 +29,13 @@ def generate_alerts(health_record: HealthRecord, traced_contacts: dict, session=
     symptoms, precautions = _symptoms_and_precautions(health_record)
 
     best_per_user: dict[int, dict] = {}
-    for direction_results in traced_contacts.values():
+    for direction in ("forward", "backward"):
+        direction_results = traced_contacts.get(direction)
+        if not isinstance(direction_results, dict):
+            continue
         for user_id, info in direction_results.items():
+            if not isinstance(info, dict):
+                continue
             if user_id not in best_per_user or info["risk_score"] > best_per_user[user_id]["risk_score"]:
                 best_per_user[user_id] = info
 

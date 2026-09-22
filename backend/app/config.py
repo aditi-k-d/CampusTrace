@@ -17,7 +17,7 @@ class Config:
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",
-        "mysql+pymysql://root:password@localhost:3306/campustrace",
+        "sqlite:///" + os.path.join(basedir, "campustrace.db"),
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # Recycle connections periodically — avoids "MySQL server has gone away"

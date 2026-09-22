@@ -72,7 +72,15 @@ def _build_bounded_graph(source_id: int, max_depth: int, date_predicate) -> Grap
     return graph
 
 
-def _score_traced(traced: dict, graph: Graph, reference_date: date_cls) -> dict:
+def _score_traced(traced: dict, graph: Graph, reference_date: date_cls,
+                  low_threshold: float, high_threshold: float) -> dict:
+    """Score each traced contact and include per-edge detail for visualization.
+
+    Each contact entry now contains:
+      depth, risk_score, risk_level, contact_type ("direct" | "indirect"),
+      duration_minutes, contact_date, days_since_contact,
+      room_type_weight, hop_decay, base_score
+    """
     scored = {}
     for node, info in traced.items():
         parent = info["parent"]
@@ -88,7 +96,8 @@ def _score_traced(traced: dict, graph: Graph, reference_date: date_cls) -> dict:
         if edge_attrs is None:
             continue  # shouldn't happen, but don't let one bad node break the batch
 
-        days_since = abs((reference_date - edge_attrs["contact_date"]).days)
+        contact_date = edge_attrs["contact_date"]
+        days_since = abs((reference_date - contact_date).days)
         base_score = compute_contact_risk(
             duration_minutes=edge_attrs["duration_minutes"],
             days_since_contact=days_since,
@@ -100,19 +109,85 @@ def _score_traced(traced: dict, graph: Graph, reference_date: date_cls) -> dict:
         scored[node] = {
             "depth": depth,
             "risk_score": round(combined_score * 100, 2),
-            "risk_level": classify_risk(combined_score),
+            "risk_level": classify_risk(combined_score, low_threshold, high_threshold),
+            # Edge detail — surfaced for visualization and analytics breakdown
+            "contact_type": "direct" if depth == 1 else "indirect",
+            "duration_minutes": edge_attrs["duration_minutes"],
+            "contact_date": str(contact_date),
+            "days_since_contact": days_since,
+            "room_type_weight": round(edge_weight, 4),
+            "hop_decay": round(hop_decay, 4),
+            "base_score": round(base_score * 100, 2),
         }
     return scored
+
+
+def _build_graph_payload(source_id: int, all_contacts: dict) -> dict:
+    """Build a vis-network-compatible nodes/edges payload from the combined
+    forward+backward contact maps.
+
+    Nodes:  {id, is_source, depth, risk_score, risk_level}
+    Edges:  {source, target, duration_minutes, contact_date, weight}
+    """
+    node_map: dict[int, dict] = {
+        source_id: {
+            "id": source_id,
+            "is_source": True,
+            "depth": 0,
+            "risk_score": None,
+            "risk_level": "source",
+        }
+    }
+    edge_set: list[dict] = []
+
+    for direction_contacts in all_contacts.values():
+        for user_id, info in direction_contacts.items():
+            if user_id not in node_map:
+                node_map[user_id] = {
+                    "id": user_id,
+                    "is_source": False,
+                    "depth": info["depth"],
+                    "risk_score": info["risk_score"],
+                    "risk_level": info["risk_level"],
+                }
+            edge_set.append({
+                "source": source_id if info["depth"] == 1 else None,  # simplified; parent unavailable here
+                "target": user_id,
+                "duration_minutes": info.get("duration_minutes"),
+                "contact_date": info.get("contact_date"),
+                "weight": info.get("room_type_weight"),
+            })
+
+    return {
+        "nodes": list(node_map.values()),
+        "edges": edge_set,
+    }
 
 
 def trace_case(health_record: HealthRecord, direction: str | None = None, max_depth: int | None = None) -> dict:
     """direction: 'forward' | 'backward' | 'both'. Defaults come from
     SystemConfig (Institute Admin's global tracing settings) but can be
     overridden per-case, per methodology.md ("configurable per outbreak
-    rather than hardcoded")."""
+    rather than hardcoded").
+
+    Risk thresholds are read from SystemConfig so Health Admin's
+    feedback-review adjustments take effect immediately on the next
+    trace, without changing risk_engine.py's own constants.
+
+    Returns:
+      {
+        "forward": {user_id: {...scored...}},   # if direction in forward/both
+        "backward": {user_id: {...scored...}},  # if direction in backward/both
+        "graph": {"nodes": [...], "edges": [...]},
+      }
+    """
     config = SystemConfig.get()
     direction = direction or config.default_tracing_direction
     max_depth = max_depth or config.default_tracing_depth
+
+    # Float cast: Numeric columns come back as Decimal from SQLAlchemy.
+    low_threshold = float(config.risk_low_threshold)
+    high_threshold = float(config.risk_high_threshold)
 
     source_id = health_record.user_id
     onset = health_record.onset_date
@@ -122,12 +197,52 @@ def trace_case(health_record: HealthRecord, direction: str | None = None, max_de
         fwd_predicate = lambda q: q.filter(ContactEdge.contact_date >= onset)
         fwd_graph = _build_bounded_graph(source_id, max_depth, fwd_predicate)
         fwd_traced = trace_forward(fwd_graph, source_id, max_depth)
-        results["forward"] = _score_traced(fwd_traced, fwd_graph, onset)
+        results["forward"] = _score_traced(fwd_traced, fwd_graph, onset, low_threshold, high_threshold)
 
     if direction in ("backward", "both"):
         bwd_predicate = lambda q: q.filter(ContactEdge.contact_date < onset)
         bwd_graph = _build_bounded_graph(source_id, max_depth, bwd_predicate)
         bwd_traced = trace_backward(bwd_graph, source_id, max_depth)
-        results["backward"] = _score_traced(bwd_traced, bwd_graph, onset)
+        results["backward"] = _score_traced(bwd_traced, bwd_graph, onset, low_threshold, high_threshold)
+
+    results["graph"] = _build_graph_payload(source_id, {
+        k: v for k, v in results.items() if k != "graph"
+    })
 
     return results
+
+
+def get_case_risk_breakdown(health_record: HealthRecord) -> list[dict]:
+    """Return a flat list of contact risk-breakdown entries suitable for the
+    analytics breakdown view.  Calls trace_case() internally and reshapes —
+    no scoring is recomputed here.
+
+    Each entry:
+      {user_id, direction, depth, contact_type, duration_minutes,
+       contact_date, days_since_contact, room_type_weight, hop_decay,
+       base_score, risk_score, risk_level}
+    """
+    trace_result = trace_case(health_record)
+    breakdown: list[dict] = []
+
+    for direction in ("forward", "backward"):
+        contacts = trace_result.get(direction, {})
+        for user_id, info in contacts.items():
+            breakdown.append({
+                "user_id": user_id,
+                "direction": direction,
+                "depth": info["depth"],
+                "contact_type": info["contact_type"],
+                "duration_minutes": info.get("duration_minutes"),
+                "contact_date": info.get("contact_date"),
+                "days_since_contact": info.get("days_since_contact"),
+                "room_type_weight": info.get("room_type_weight"),
+                "hop_decay": info.get("hop_decay"),
+                "base_score": info.get("base_score"),
+                "risk_score": info["risk_score"],
+                "risk_level": info["risk_level"],
+            })
+
+    # Sort by risk_score descending so the breakdown table leads with highest risk
+    breakdown.sort(key=lambda x: x["risk_score"], reverse=True)
+    return breakdown

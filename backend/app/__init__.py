@@ -36,6 +36,7 @@ def create_app(config_name: str = "development") -> Flask:
     # assignment target. `from app import models` avoids that trap.
     with app.app_context():
         from app import models  # noqa: F401
+        db.create_all()
 
     return app
 
@@ -53,20 +54,21 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
     # --- Person 2: student ---
-    # from app.routes.student import student_bp
-    # app.register_blueprint(student_bp, url_prefix="/api/student")
+    from app.routes.student import student_bp
+    app.register_blueprint(student_bp, url_prefix="/api/student")
 
     # --- Person 3: course faculty + class teacher ---
-    # from app.routes.faculty import faculty_bp
-    # app.register_blueprint(faculty_bp, url_prefix="/api/faculty")
-    # from app.routes.class_teacher import class_teacher_bp
-    # app.register_blueprint(class_teacher_bp, url_prefix="/api/class-teacher")
+    from app.routes.faculty import faculty_bp
+    app.register_blueprint(faculty_bp, url_prefix="/api/faculty")
+    from app.routes.class_teacher import class_teacher_bp
+    app.register_blueprint(class_teacher_bp, url_prefix="/api/class-teacher")
 
     # --- Person 4: health admin + institute admin ---
-    # from app.routes.health_admin import health_admin_bp
-    # app.register_blueprint(health_admin_bp, url_prefix="/api/health-admin")
-    # from app.routes.institute_admin import institute_admin_bp
-    # app.register_blueprint(institute_admin_bp, url_prefix="/api/institute-admin")
+    from app.routes.health_admin import health_admin_bp
+    app.register_blueprint(health_admin_bp, url_prefix="/api/health-admin")
+    from app.routes.institute_admin import institute_admin_bp
+    app.register_blueprint(institute_admin_bp, url_prefix="/api/institute-admin")
+
 
     pass
 
