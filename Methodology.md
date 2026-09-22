@@ -60,6 +60,7 @@ Tracing depth and direction (forward vs backward, how many degrees of contact) a
 - Feedback loop: flagged false positives adjust future risk weights
 - End-to-end testing: seed a test case, verify tracing/alerts/dashboards work correctly together
 - Audit logging for Institute Admin oversight
+- Async background tracing: move synchronous health-report tracing to an asynchronous background job queue (e.g., Celery/Redis) for production-scale institution deployment
 - Evaluation metrics: precision/recall of exposure detection against a known ground-truth test case, alert latency
 - Final documentation, report, and demo preparation
 

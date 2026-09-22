@@ -77,7 +77,7 @@ Requires a valid token. Response `200`:
 
 ---
 
-## Student — **DRAFT** (Person 2, confirm before building)
+## Student — **BUILT** (Person 2)
 
 All routes below require `@role_required("student")` and act only on
 the calling student's own data — per role_hierarchy.md, a student can
@@ -97,7 +97,7 @@ never see another student's data.
 
 ---
 
-## Course Faculty — **DRAFT** (Person 3, confirm before building)
+## Course Faculty — **BUILT** (Person 3)
 
 Requires `@role_required("course_faculty", "class_teacher")` scoped to
 courses the faculty member is assigned to via `FacultyCourseAssignment`.
@@ -109,7 +109,7 @@ courses the faculty member is assigned to via `FacultyCourseAssignment`.
 | `POST /faculty/absence-flags` | Flag a student absent for health reasons | `{ "student_id": 1, "course_id": 2, "flagged_date": "YYYY-MM-DD", "reason_category": "string" }` | `201` |
 | `GET /faculty/absence-flags` | Status of flags they've raised | — | `200` list with `state` |
 
-## Class Teacher — **DRAFT** (Person 3, confirm before building)
+## Class Teacher — **BUILT** (Person 3)
 
 Everything Course Faculty can do, at division level, plus:
 
@@ -121,37 +121,48 @@ Everything Course Faculty can do, at division level, plus:
 
 ---
 
-## Health Admin — **DRAFT** (Person 4, confirm before building)
+## Health Admin — **BUILT** (Person 4)
 
-Requires `@role_required("health_admin")`. Fine-grained access here is
-audited — every call should write an `AuditLog` row.
+Requires `@role_required("health_admin")`. Every call writes an `AuditLog` row.
 
 | Method & Path | Purpose | Request | Response |
 |---|---|---|---|
-| `GET /health-admin/cases` | All reported/flagged cases across divisions | query filters: `?status=`, `?disease_id=` | `200` list |
-| `POST /health-admin/cases/<id>/confirm` | Confirm or reclassify a case | `{ "disease_id": 3 }` | `200` |
-| `GET /health-admin/contact-graph/<case_id>` | Full contact graph / cluster viz for a case | query: `?direction=forward\|backward\|both&max_depth=2` | `200` — calls `tracing_service.trace_case()` (Person 1) |
-| `POST /health-admin/contact-graph/<case_id>/retrace` | Manually re-trigger tracing with adjusted depth/direction | `{ "direction": "...", "max_depth": 3 }` | `200` |
+| `GET /health-admin/cases` | All reported/flagged cases across divisions | query: `?status=`, `?disease_id=`, paginate `?limit=&cursor=` | `200` cursor-paginated list |
+| `POST /health-admin/cases/<id>/confirm` | Confirm or reclassify a case | `{ "disease_id": 3 }` (optional) | `200` |
+| `GET /health-admin/contact-graph/<case_id>` | Full contact graph for a case | query: `?direction=forward\|backward\|both&max_depth=2` | `200` `{ "case_id": N, "contacts": { "forward": { user_id: { depth, risk_score, risk_level } } } }` |
+| `POST /health-admin/contact-graph/<case_id>/retrace` | Re-trigger tracing with custom params | `{ "direction": "...", "max_depth": 3 }` | `200` same shape as GET |
 | `GET /health-admin/disease-kb` | List KB entries | — | `200` list |
 | `POST /health-admin/disease-kb` | Add a KB entry | `{ "name": "...", "symptoms": "...", "preventive_measures": "...", "incubation_period_days": 5 }` | `201` |
 | `PATCH /health-admin/disease-kb/<id>` | Edit a KB entry | partial fields | `200` |
-| `GET /health-admin/capacity` | Isolation/health-center capacity | — | `200` list of facilities with occupied/total |
-| `POST /health-admin/capacity/<id>/allocate` | Allocate a bed via priority queue | `{ "user_id": 1 }` | `201` — uses `priority_queue.py` (Person 1) via `capacity_service.py` (Person 4) |
-| `POST /health-admin/feedback/<alert_id>/review` | Review a false-positive flag, adjust weights | `{ "adjust_weight": true }` | `200` |
+| `GET /health-admin/capacity` | Isolation/health-center capacity | — | `200` list with `available_beds` computed |
+| `POST /health-admin/capacity/<id>/allocate` | Allocate a bed | `{ "user_id": 1 }` (optional — omit to auto-select highest-priority alert user) | `201` — uses `PriorityQueue` via `capacity_service.py` |
+| `POST /health-admin/feedback/<alert_id>/review` | Review a false-positive flag | `{ "adjust_weight": true }` | `200` — if `adjust_weight=true`, nudges `system_config.risk_low_threshold` up by 0.05 |
 
-## Institute Admin — **DRAFT** (Person 4, confirm before building)
+
+## Institute Admin — **BUILT** (Person 4)
 
 Requires `@role_required("institute_admin")`.
 
 | Method & Path | Purpose | Request | Response |
 |---|---|---|---|
 | `GET /institute-admin/dashboards/aggregate` | K-anonymized dashboards across divisions | — | `200` — counts below `k_anonymity_threshold` suppressed server-side |
+| `GET /institute-admin/dashboards/trends` | Outbreak trend report per day | — | `200` — k-anonymized daily case counts |
+| `GET /institute-admin/dashboards/by-department` | Department-wise statistics | — | `200` — k-anonymized case & alert counts by branch |
+| `GET /institute-admin/dashboards/high-overlap-locations` | High-overlap locations ranked by distinct users/courses | — | `200` — k-anonymized room usage |
+| `GET /institute-admin/dashboards/analytics` | Exposure analytics by location & department | — | `200` — k-anonymized exposure counts |
+| `GET /institute-admin/dashboards/event-exposures` | Event-wise exposure counts per session | — | `200` — k-anonymized event exposure counts |
 | `POST /institute-admin/divisions` | Add a division | `{ "name": "...", "branch": "...", "year": 2 }` | `201` |
+| `POST /institute-admin/rooms` | Add a room | `{ "name": "...", "building": "..." \| null, "capacity": 40 \| null }` | `201` |
 | `POST /institute-admin/courses` | Add a course | `{ "division_id": 1, "code": "...", "name": "...", "course_type": "theory\|lab\|tutorial" }` | `201` |
-| `POST /institute-admin/timetable-slots` | Add a timetable slot | `{ "course_id": 1, "room_id": 1, "batch_id": null, "day_of_week": 0, "start_time": "09:00", "end_time": "10:00" }` | `201` |
+| `POST /institute-admin/batches` | Add a batch to a course | `{ "course_id": 1, "name": "B1" }` | `201` |
+| `POST /institute-admin/faculty-assignments` | Assign a faculty user to a course | `{ "faculty_id": 1, "course_id": 1 }` | `201` — validates user has `course_faculty` or `class_teacher` role |
+| `POST /institute-admin/timetable-slots` | Add a timetable slot | `{ "course_id": 1, "room_id": 1, "batch_id": null, "day_of_week": 0, "start_time": "09:00", "end_time": "10:00" }` | `201` — validates no overlap (returns `409` on conflict) |
+| `GET /institute-admin/users` | List user accounts | query: `?role=` | `200` list of users |
+| `PATCH /institute-admin/users/<id>` | Toggle user active status | `{ "is_active": true \| false }` | `200` — rejects self-deactivation (`400`) |
 | `GET /institute-admin/system-config` | View current k-anon threshold / tracing defaults | — | `200` |
-| `PATCH /institute-admin/system-config` | Update system-wide settings | `{ "k_anonymity_threshold": 5, "default_tracing_depth": 2 }` | `200` — maps to `SystemConfig` (Person 1) |
-| `GET /institute-admin/audit-log` | View audit log | query: `?user_id=&action=&from=&to=` (paginate: `?limit=&cursor=`) | `200` |
+| `PATCH /institute-admin/system-config` | Update system-wide settings | `{ "k_anonymity_threshold": 5, "default_tracing_depth": 2, "default_tracing_direction": "both" }` | `200` — maps to `SystemConfig` (Person 1) |
+| `GET /institute-admin/audit-log` | View audit log | query: `?user_id=&action=` (paginate: `?limit=&cursor=`) | `200` — cursor-paginated, `{ "items": [...], "next_cursor": "..." }` |
+
 
 ---
 

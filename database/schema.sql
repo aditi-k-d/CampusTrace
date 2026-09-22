@@ -233,10 +233,13 @@ CREATE TABLE system_config (
     k_anonymity_threshold   SMALLINT UNSIGNED NOT NULL DEFAULT 5,
     default_tracing_depth   TINYINT UNSIGNED NOT NULL DEFAULT 2,
     default_tracing_direction ENUM('forward','backward','both') NOT NULL DEFAULT 'both',
+    risk_low_threshold      DECIMAL(4,3) NOT NULL DEFAULT 0.300,   -- classify_risk() low boundary
+    risk_high_threshold     DECIMAL(4,3) NOT NULL DEFAULT 0.650,   -- classify_risk() high boundary
     updated_by              INT UNSIGNED NULL,
     updated_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL,
-    CONSTRAINT chk_single_row CHECK (id = 1)
+    CONSTRAINT chk_single_row CHECK (id = 1),
+    CONSTRAINT chk_risk_thresholds CHECK (risk_low_threshold < risk_high_threshold)
 ) ENGINE=InnoDB;
 
 CREATE TABLE audit_log (
