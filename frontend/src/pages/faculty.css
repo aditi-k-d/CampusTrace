@@ -1,0 +1,97 @@
+/* ==========================================================================
+   faculty.css — Course Faculty & Class Teacher page-specific styles
+   Shared primitives (card, table, button, form, badge) are in layout.css
+   ========================================================================== */
+
+.faculty-dashboard-page {
+  padding: 0;
+  min-height: auto;
+  background: transparent;
+}
+
+/* ---- Stats Row (Attendance / Division Overview) ---- */
+.stats-row {
+  display: flex;
+  gap: 0.875rem;
+  margin: 0.875rem 0;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 110px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: box-shadow 0.18s;
+}
+
+.stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+.stat-num {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 0.3rem;
+}
+
+/* ---- Health Summary Box (Attendance panel) ---- */
+.health-summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem 1.125rem;
+  margin-bottom: 1.25rem;
+}
+
+.health-summary-box p { margin: 0.2rem 0; font-size: 0.875rem; }
+
+/* ---- Escalation items ---- */
+.escalations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.escalation-item {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.escalation-item p {
+  margin: 0.3rem 0;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+/* ---- Absence flag table ---- */
+.absence-flag-table .state-pending  td { background: #fffbeb; }
+.absence-flag-table .state-resolved td { background: #f0fdf4; }
+
+/* ---- Empty state ---- */
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.empty-state-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
