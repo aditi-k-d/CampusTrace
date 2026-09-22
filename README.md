@@ -1,128 +1,146 @@
 # CampusTrace
 
-CampusTrace is an institutional health monitoring, contact tracing, and outbreak prevention system built with Flask (Python), MySQL, and React (Vite).
+CampusTrace is a college-level, role-based health surveillance and contact-tracing application. It derives possible contacts from academic structure—divisions, course enrolments, batches, rooms, and timetables—rather than GPS or Bluetooth tracking.
 
----
+When a student reports an illness or a faculty member flags a health-related absence, the system traces possible exposures through the generated contact network. It presents graded risk alerts and response tools to the appropriate role while preserving privacy.
 
-## Prerequisites
+> **Academic project notice:** this repository and its demo seed use synthetic data only. The symptom checker is a triage aid, not a medical diagnosis tool.
 
-- **Python 3.10+**
-- **Node.js 18+** & `npm`
-- **MySQL Server** (running locally on port `3306`)
+## Key capabilities
 
----
+- Role-based access for Students, Course Faculty, Class Teachers, Health Admins, and Institute Admins.
+- Timetable-driven presence simulation and contact-edge generation.
+- Forward, backward, and bidirectional BFS contact tracing with configurable depth.
+- Risk classification using contact duration, temporal recency, location weighting, and hop decay.
+- Private student exposure alerts and false-positive feedback.
+- Health Admin contact-network visualisation, case analytics, priority queue, Disease Knowledge Base, and isolation-capacity workflow.
+- Institute-level k-anonymized analytics and audit logs.
 
-## 1. Database Setup
+## Technology
 
-Create the MySQL database:
-```sql
-CREATE DATABASE campustrace;
+- **Frontend:** React + Vite
+- **Backend:** Flask + SQLAlchemy + JWT authentication
+- **Database:** SQLite by default for local development; MySQL can be configured with `DATABASE_URL`.
+- **Algorithms:** custom graph traversal, risk engine, Union-Find, and priority queue implementations.
+
+## Quick start
+
+### Prerequisites
+
+- Python 3.10+
+- Node.js 18+ and npm
+
+### 1. Start the backend
+
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python run.py
 ```
 
-Import the initial schema:
-```bash
-mysql -u root -p campustrace < database/schema.sql
+The API runs at `http://localhost:5000/api`.
+
+To use MySQL instead of the local SQLite database, set `DATABASE_URL` before starting the backend:
+
+```powershell
+$env:DATABASE_URL = "mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/campustrace"
 ```
 
----
+### 2. Populate the synthetic demo data
 
-## 2. Backend Setup & Execution
+Keep the backend running, open a second terminal in the project root, and run:
 
-1. Navigate to the `backend` directory:
-   ```bash
-   cd backend
-   ```
-
-2. (Optional) Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   # Windows PowerShell:
-   .\venv\Scripts\Activate.ps1
-   # Linux/macOS:
-   source venv/bin/activate
-   ```
-
-3. Install required Python packages:
-   ```bash
-   pip install flask flask-sqlalchemy flask-jwt-extended flask-cors flask-bcrypt pymysql requests pytest
-   ```
-
-4. Set environment variables (if your MySQL username/password differs from `root:password`):
-   ```bash
-   # Windows PowerShell:
-   $env:DATABASE_URL="mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/campustrace"
-   
-   # Linux/macOS:
-   export DATABASE_URL="mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/campustrace"
-   ```
-
-5. Run the Flask API server:
-   ```bash
-   python -m flask --app app run --port 5000
-   ```
-   The backend API will start at `http://localhost:5000/api`.
-
----
-
-## 3. Seed Development Data (Optional)
-
-With the Flask backend running on `http://localhost:5000/api`, open a new terminal and run:
-
-```bash
-python scripts/dev_populate.py --base-url http://localhost:5000/api
+```powershell
+python scripts/dev_populate.py
 ```
 
-This populates the local database with:
-- **Bootstrap Institute Admin**: `admin@campustrace.edu` (Password: `AdminPassword123!`)
-- **Division**: Second Year CS-C
-- **Rooms**: Lab 101, LH 201
-- **Courses & Batches**: Data Structures (`CS201`), DSA Lab (`CS202L`), Maths Tutorial (`CS203T`)
-- **Timetable Slots**: Mon–Fri lecture & lab schedule
-- **Faculty Accounts**: `turing@campustrace.edu` & `hopper@campustrace.edu` (Password: `FacultyPass123!`)
-- **Student Accounts**: `alice@campustrace.edu`, `bob@campustrace.edu` (Password: `StudentPass123!`)
+The script resets the local development database by default, creates the demo users and academic structure, then generates three weeks of presence/contact data. Wait for its final summary before demonstrating the graph.
 
----
+### 3. Start the frontend
 
-## 4. Frontend Setup & Execution
+```powershell
+cd frontend
+npm install
+npm run dev
+```
 
-1. Navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
+Open the URL shown by Vite, normally `http://localhost:5173`.
 
-2. Install Node dependencies:
-   ```bash
-   npm install
-   ```
+## Demo accounts
 
-3. Start the Vite React development server:
-   ```bash
-   npm run dev
-   ```
+| Role | Email | Password |
+| --- | --- | --- |
+| Institute Admin | `admin@campustrace.edu` | `AdminPassword123!` |
+| Health Admin | `healthadmin@campustrace.edu` | `HealthAdminPass123!` |
+| Class Teacher (CE) | `ct_ce@campustrace.edu` | `ClassTeacherPass123!` |
+| Class Teacher (IT) | `ct_it@campustrace.edu` | `ClassTeacherPass123!` |
+| Course Faculty (CE) | `fac_ce_1@campustrace.edu` | `FacultyPass123!` |
+| Bridging Faculty | `prof.bridge@campustrace.edu` | `BridgeFacultyPass123!` |
 
-4. Open your browser and navigate to:
-   ```
-   http://localhost:5173
-   ```
+The seed script prints one sample student credential for each of the CE, IT, AI, and DS divisions when it completes.
 
----
+## Role guide
 
-## 5. Running Tests & Validation
+### Student
 
-- **Run Backend Test Suite** (141 tests):
-  ```bash
-  cd backend
-  pytest app/tests/ -v
-  ```
+- **Enrolled Courses:** view registered courses and assigned lab/tutorial batches.
+- **Report Health Issue:** submit onset date, severity, known disease, and/or symptoms. This creates a `reported` case.
+- **Health Status & History:** view only the student's own reports and their `reported` or `confirmed` state.
+- **Exposure Alerts:** view private risk guidance, acknowledge an alert, or flag it as a false positive. The identity of the source contact is never disclosed.
+- **Symptom Self-Assessment:** compare entered symptoms with the Disease Knowledge Base for non-diagnostic guidance.
+- **Absence Flags:** confirm or deny a faculty-submitted absence flag.
 
-- **Run Frontend Test Suite** (Vitest):
-  ```bash
-  cd frontend
-  npm test
-  ```
+### Course Faculty
 
-- **Production Frontend Build**:
-  ```bash
-  cd frontend
-  npx vite build
-  ```
+- **Course Attendance & Health Summary:** enter a Course ID and date to view attendance and aggregated health counts for that course.
+- **Flag Student Absence:** record a health-related or unexcused absence without assigning a medical diagnosis.
+- **Absence Flags Raised:** review the state of submitted flags.
+
+### Class Teacher
+
+- **Division Overview:** view division-wide course attendance, presence, flag counts, and active health-case counts.
+- **Absence Escalations:** review students with repeated absences across multiple courses during the rolling monitoring window.
+- **Enrollment Approvals:** approve eligible batch, transfer, or elective-enrolment changes.
+
+### Health Admin
+
+- **Health Cases Tracker:** review reported cases and use **Confirm Case** when appropriate. A case may be traced before or after confirmation.
+- **Contact Network Graph:** select a case, tracing direction, and depth, then choose **Trace Case**. Gold is the source case; red/orange/green nodes represent high/medium/low risk. Edge labels show contact duration.
+- **Risk Breakdown:** use **View Breakdown** on a case to inspect the factors used in its risk classification.
+- **Outbreak Analytics:** review cases, direct/secondary contacts, and the exposure-profile chart.
+- **Priority Queue and Capacity:** prioritize high-risk contacts for isolation and manage available beds when facilities exist.
+- **Disease Knowledge Base:** add or edit disease symptoms, precautions, and incubation periods.
+
+### Institute Admin
+
+- **Aggregated Analytics:** view division, course, department, event, and location summaries. Counts below the configured k-anonymity threshold are suppressed.
+- **Structure & Timetables:** create divisions and rooms, then courses, batches, faculty assignments, and timetable slots.
+- **User Role Management:** register staff/admin users and activate or deactivate accounts.
+- **System Configuration:** set k-anonymity, default tracing depth, and default tracing direction.
+- **Audit Log:** review sensitive operational and administrative actions.
+
+## Suggested demo flow
+
+1. Use a student account to show a health report or alert.
+2. Use Course Faculty to show attendance and absence flagging.
+3. Use Class Teacher to show a division pattern or escalation.
+4. Use Health Admin to trace a seeded case. Case #5 is a good starting point after the seed completes.
+5. Use Institute Admin to show privacy-preserving aggregated analytics and audit accountability.
+
+## Validation
+
+```powershell
+# Frontend tests and production build
+cd frontend
+npm test
+npm run build
+```
+
+Backend tests use the configured test database:
+
+```powershell
+cd backend
+pytest app/tests -v
+```
