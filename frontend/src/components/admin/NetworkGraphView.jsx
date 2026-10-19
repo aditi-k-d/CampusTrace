@@ -344,7 +344,7 @@ export default function NetworkGraphView({ cases = [] }) {
           <label htmlFor="ng-case-id">Health Record (Case) ID</label>
           <input
             id="ng-case-id"
-            type="number"
+            type="text"
             placeholder="Case ID"
             value={caseId}
             onChange={(e) => {
@@ -388,7 +388,7 @@ export default function NetworkGraphView({ cases = [] }) {
           <label htmlFor="ng-depth">Max Depth</label>
           <input
             id="ng-depth"
-            type="number"
+            type="text"
             min="1"
             max="5"
             value={maxDepth}
@@ -429,3 +429,4 @@ export default function NetworkGraphView({ cases = [] }) {
     </div>
   );
 }
+

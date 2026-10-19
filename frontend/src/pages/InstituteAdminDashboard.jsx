@@ -22,7 +22,6 @@ import { getUser, clearSession } from "../auth/authStorage";
 import { useNavigate } from "react-router-dom";
 import AuditLogViewer from "../components/admin/AuditLogViewer";
 import DashboardShell from "../components/layout/DashboardShell";
-import ModuleCard from "../components/layout/ModuleCard";
 import "./admin.css";
 
 export default function InstituteAdminDashboard() {
@@ -115,6 +114,10 @@ export default function InstituteAdminDashboard() {
   useEffect(() => {
     loadAllData();
   }, [userRoleFilter]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeTab]);
 
   function handleLogout() {
     clearSession();
@@ -219,8 +222,8 @@ export default function InstituteAdminDashboard() {
     setError(null);
     try {
       await assignFaculty({
-        faculty_id: Number(facAssignForm.faculty_id),
-        course_id: Number(facAssignForm.course_id),
+        faculty_id: facAssignForm.faculty_id,
+        course_id: facAssignForm.course_id,
       });
       setFormMsg("Faculty assigned to course successfully.");
       setFacAssignForm({ faculty_id: "", course_id: "" });
@@ -235,8 +238,8 @@ export default function InstituteAdminDashboard() {
     setError(null);
     try {
       await createTimetableSlot({
-        course_id: Number(slotForm.course_id),
-        room_id: Number(slotForm.room_id),
+        course_id: slotForm.course_id,
+        room_id: slotForm.room_id,
         batch_id: slotForm.batch_id ? Number(slotForm.batch_id) : null,
         day_of_week: Number(slotForm.day_of_week),
         start_time: slotForm.start_time,
@@ -295,44 +298,11 @@ export default function InstituteAdminDashboard() {
   const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   const sidebarNavItems = [
-    { id: "analytics", label: "Aggregated Analytics", icon: "📊", onClick: () => setActiveTab("analytics") },
-    { id: "structure", label: "Structure & Timetables", icon: "🏛️", onClick: () => setActiveTab("structure") },
-    { id: "users", label: "User Role Management", icon: "👤", onClick: () => setActiveTab("users") },
-    { id: "config", label: "System Configuration", icon: "⚙️", onClick: () => setActiveTab("config") },
-    { id: "audit", label: "Audit Log Viewer", icon: "📜", onClick: () => setActiveTab("audit") },
-  ];
-
-  const tabModules = [
-    {
-      id: "analytics",
-      title: "Aggregated Analytics & Trends",
-      description: "K-anonymized division and course counts, outbreak trends, and high-overlap locations",
-      badge: "K-Anonymized",
-    },
-    {
-      id: "structure",
-      title: "Structure & Timetable Setup",
-      description: "Divisions, rooms with capacities, courses, batches, and timetable slots",
-      badge: "Architecture",
-    },
-    {
-      id: "users",
-      title: "User Role Management",
-      description: "Register faculty & health staff; manage user account active status",
-      badge: "RBAC",
-    },
-    {
-      id: "config",
-      title: "System Configuration",
-      description: "Adjust k-anonymity threshold, default tracing depth and direction",
-      badge: "Config",
-    },
-    {
-      id: "audit",
-      title: "Audit Log Viewer",
-      description: "Immutable institutional activity log with action filtering and cursor pagination",
-      badge: "Audit Trail",
-    },
+    { id: "analytics", label: "Aggregated Analytics", onClick: () => setActiveTab("analytics") },
+    { id: "structure", label: "Structure & Timetables", onClick: () => setActiveTab("structure") },
+    { id: "users", label: "User Role Management", onClick: () => setActiveTab("users") },
+    { id: "config", label: "System Configuration", onClick: () => setActiveTab("config") },
+    { id: "audit", label: "Audit Log Viewer", onClick: () => setActiveTab("audit") },
   ];
 
   return (
@@ -347,56 +317,6 @@ export default function InstituteAdminDashboard() {
       onLogout={handleLogout}
     >
       <div className="admin-dashboard-page" style={{ padding: 0, minHeight: "auto", background: "transparent" }}>
-        {/* Card-based Module Entry Points */}
-        <div className="module-entry-grid">
-          {tabModules.map((m) => (
-            <ModuleCard
-              key={m.id}
-              title={m.title}
-              description={m.description}
-              badge={m.badge}
-              badgeType={activeTab === m.id ? "primary" : "secondary"}
-              interactive
-              actionText={activeTab === m.id ? "Active Module ✓" : "Open Module →"}
-              onClick={() => setActiveTab(m.id)}
-              style={activeTab === m.id ? { borderColor: "#2563eb", background: "#f8fafc" } : {}}
-            />
-          ))}
-        </div>
-
-        <div className="tab-navigation" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", borderBottom: "2px solid #e5e7eb", paddingBottom: "0.5rem" }}>
-          <button
-            style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", cursor: "pointer", background: activeTab === "analytics" ? "#2563eb" : "#f3f4f6", color: activeTab === "analytics" ? "#fff" : "#374151", fontWeight: "bold" }}
-            onClick={() => setActiveTab("analytics")}
-          >
-            Aggregated Analytics & Trends
-          </button>
-          <button
-            style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", cursor: "pointer", background: activeTab === "structure" ? "#2563eb" : "#f3f4f6", color: activeTab === "structure" ? "#fff" : "#374151", fontWeight: "bold" }}
-            onClick={() => setActiveTab("structure")}
-          >
-            Structure & Timetable Setup
-          </button>
-          <button
-            style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", cursor: "pointer", background: activeTab === "users" ? "#2563eb" : "#f3f4f6", color: activeTab === "users" ? "#fff" : "#374151", fontWeight: "bold" }}
-            onClick={() => setActiveTab("users")}
-          >
-            User Role Management
-          </button>
-          <button
-            style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", cursor: "pointer", background: activeTab === "config" ? "#2563eb" : "#f3f4f6", color: activeTab === "config" ? "#fff" : "#374151", fontWeight: "bold" }}
-            onClick={() => setActiveTab("config")}
-          >
-            System Config
-          </button>
-          <button
-            style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", cursor: "pointer", background: activeTab === "audit" ? "#2563eb" : "#f3f4f6", color: activeTab === "audit" ? "#fff" : "#374151", fontWeight: "bold" }}
-            onClick={() => setActiveTab("audit")}
-          >
-            Audit Log
-          </button>
-        </div>
-
       <main>
         {/* --- TAB 1: ANALYTICS & TRENDS --- */}
         {activeTab === "analytics" && (
@@ -412,6 +332,7 @@ export default function InstituteAdminDashboard() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
                   <div>
                     <h3>Divisions Breakdown</h3>
+                    <div className="admin-list-scroll">
                     <table className="data-table">
                       <thead>
                         <tr>
@@ -432,10 +353,12 @@ export default function InstituteAdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
 
                   <div>
                     <h3>Courses Breakdown</h3>
+                    <div className="admin-list-scroll">
                     <table className="data-table">
                       <thead>
                         <tr>
@@ -454,6 +377,7 @@ export default function InstituteAdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 </div>
               ) : null}
@@ -465,6 +389,7 @@ export default function InstituteAdminDashboard() {
                 {outbreakTrends.length === 0 ? (
                   <p className="text-muted">No trend data logged yet.</p>
                 ) : (
+                  <div className="admin-list-scroll">
                   <table className="data-table">
                     <thead>
                       <tr>
@@ -481,6 +406,7 @@ export default function InstituteAdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
 
@@ -489,6 +415,7 @@ export default function InstituteAdminDashboard() {
                 {departmentStats.length === 0 ? (
                   <p className="text-muted">No department data available.</p>
                 ) : (
+                  <div className="admin-list-scroll">
                   <table className="data-table">
                     <thead>
                       <tr>
@@ -507,6 +434,7 @@ export default function InstituteAdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
             </div>
@@ -517,6 +445,7 @@ export default function InstituteAdminDashboard() {
                 {highOverlapLocations.length === 0 ? (
                   <p className="text-muted">No location data available.</p>
                 ) : (
+                  <div className="admin-list-scroll">
                   <table className="data-table">
                     <thead>
                       <tr>
@@ -537,6 +466,7 @@ export default function InstituteAdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
 
@@ -545,6 +475,7 @@ export default function InstituteAdminDashboard() {
                 {analyticsData?.exposure_by_location?.length === 0 ? (
                   <p className="text-muted">No exposure location data.</p>
                 ) : (
+                  <div className="admin-list-scroll">
                   <table className="data-table">
                     <thead>
                       <tr>
@@ -561,6 +492,7 @@ export default function InstituteAdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
             </div>
@@ -570,6 +502,7 @@ export default function InstituteAdminDashboard() {
               {eventExposures.length === 0 ? (
                 <p className="text-muted">No event exposure sessions recorded.</p>
               ) : (
+                <div className="admin-list-scroll users-list-scroll">
                 <table className="data-table">
                   <thead>
                     <tr>
@@ -588,8 +521,9 @@ export default function InstituteAdminDashboard() {
                         <td>{ev.suppressed ? <em className="text-muted">&lt; {config?.k_anonymity_threshold}</em> : ev.exposure_count}</td>
                       </tr>
                     ))}
-                  </tbody>
+                </tbody>
                 </table>
+                </div>
               )}
             </div>
           </div>
@@ -625,7 +559,7 @@ export default function InstituteAdminDashboard() {
                 <div className="form-group">
                   <label>Year</label>
                   <input
-                    type="number"
+                    type="text"
                     min="1"
                     max="5"
                     value={divForm.year}
@@ -660,7 +594,7 @@ export default function InstituteAdminDashboard() {
                 <div className="form-group">
                   <label>Seating Capacity</label>
                   <input
-                    type="number"
+                    type="text"
                     min="1"
                     placeholder="e.g. 60"
                     value={roomForm.capacity}
@@ -760,7 +694,7 @@ export default function InstituteAdminDashboard() {
                 <div className="form-group">
                   <label>Faculty User ID</label>
                   <input
-                    type="number"
+                    type="text"
                     placeholder="e.g. 5"
                     value={facAssignForm.faculty_id}
                     onChange={(e) => setFacAssignForm({ ...facAssignForm, faculty_id: e.target.value })}
@@ -805,7 +739,7 @@ export default function InstituteAdminDashboard() {
                 <div className="form-group">
                   <label>Room ID</label>
                   <input
-                    type="number"
+                    type="text"
                     placeholder="e.g. Room ID"
                     value={slotForm.room_id}
                     onChange={(e) => setSlotForm({ ...slotForm, room_id: e.target.value })}
@@ -815,7 +749,7 @@ export default function InstituteAdminDashboard() {
                 <div className="form-group">
                   <label>Batch ID (Optional)</label>
                   <input
-                    type="number"
+                    type="text"
                     placeholder="e.g. Batch ID for lab"
                     value={slotForm.batch_id}
                     onChange={(e) => setSlotForm({ ...slotForm, batch_id: e.target.value })}
@@ -860,6 +794,7 @@ export default function InstituteAdminDashboard() {
 
         {/* --- TAB 3: USER MANAGEMENT --- */}
         {activeTab === "users" && (
+          <>
           <div className="tab-pane" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1.5rem" }}>
             <div className="card">
               <h2>User Accounts List</h2>
@@ -919,6 +854,7 @@ export default function InstituteAdminDashboard() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
 
             <div className="card">
@@ -967,7 +903,7 @@ export default function InstituteAdminDashboard() {
                   <div className="form-group">
                     <label>Division ID</label>
                     <input
-                      type="number"
+                      type="text"
                       value={newUser.division_id}
                       onChange={(e) => setNewUser({ ...newUser, division_id: e.target.value })}
                     />
@@ -976,7 +912,8 @@ export default function InstituteAdminDashboard() {
                 <button type="submit">Register Role User</button>
               </form>
             </div>
-          </div>
+            
+          </>
         )}
 
         {/* --- TAB 4: SYSTEM CONFIG --- */}
@@ -988,7 +925,7 @@ export default function InstituteAdminDashboard() {
                 <label htmlFor="k-anon-thresh">K-Anonymity Threshold</label>
                 <input
                   id="k-anon-thresh"
-                  type="number"
+                  type="text"
                   min="1"
                   value={kAnonInput}
                   onChange={(e) => setKAnonInput(e.target.value)}
@@ -1001,7 +938,7 @@ export default function InstituteAdminDashboard() {
                 <label htmlFor="def-depth">Default Tracing Depth</label>
                 <input
                   id="def-depth"
-                  type="number"
+                  type="text"
                   min="1"
                   value={depthInput}
                   onChange={(e) => setDepthInput(e.target.value)}
@@ -1039,3 +976,4 @@ export default function InstituteAdminDashboard() {
   </DashboardShell>
   );
 }
+

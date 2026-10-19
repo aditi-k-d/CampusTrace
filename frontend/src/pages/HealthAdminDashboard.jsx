@@ -20,6 +20,7 @@ export default function HealthAdminDashboard() {
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState(null);
   const [selectedBreakdownCaseId, setSelectedBreakdownCaseId] = useState(null);
+  const [activeModule, setActiveModule] = useState("cases");
 
   async function loadCases() {
     setLoading(true);
@@ -37,6 +38,18 @@ export default function HealthAdminDashboard() {
   useEffect(() => {
     loadCases();
   }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeModule]);
+
+  useEffect(() => {
+    if (!selectedBreakdownCaseId) return;
+    document.getElementById("risk-breakdown-module")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [selectedBreakdownCaseId]);
 
   async function handleConfirmCase(caseId) {
     setActionLoading(caseId);
@@ -60,55 +73,22 @@ export default function HealthAdminDashboard() {
     <DashboardShell
       title="Health Admin Portal"
       subtitle="Epidemiological Surveillance, Contact Network Tracing & Facility Management"
+      activeNav={activeModule}
+      onNavClick={setActiveModule}
       error={error}
       onLogout={handleLogout}
     >
       <div className="admin-dashboard-page" style={{ padding: 0, minHeight: "auto", background: "transparent" }}>
-        {/* Card-based Module Entry Points */}
-        <div className="module-entry-grid">
-          <ModuleCard
-            title="Health Cases Tracker"
-            description="Real-time case confirmation, disease matching, and severity surveillance"
-            badge={`${cases.length} Cases`}
-            badgeType={cases.length > 0 ? "warning" : "success"}
-            actionText="Track Cases →"
-            href="#cases-module"
-          />
-          <ModuleCard
-            title="Contact Graph Tracing"
-            description="Temporal and spatial BFS contact traversal forward and backward from onset"
-            badge="Graph Engine"
-            badgeType="primary"
-            actionText="Trace Contacts →"
-            href="#contact-graph-module"
-          />
-          <ModuleCard
-            title="Isolation Facility"
-            description="Beds inventory management and priority-queue isolation allocation"
-            badge="Beds Allocation"
-            badgeType="primary"
-            actionText="Manage Beds →"
-            href="#capacity-module"
-          />
-          <ModuleCard
-            title="Disease Knowledge Base"
-            description="Central disease definitions, symptoms, incubation periods, and precautions"
-            badge="KB Records"
-            badgeType="primary"
-            actionText="Manage KB →"
-            href="#disease-kb-module"
-          />
-        </div>
-
         {/* Analytics Summary Section */}
-        <div id="analytics-summary-module" style={{ marginBottom: "1.5rem" }}>
+        <div id="analytics-summary-module" hidden={activeModule !== "analytics"} style={{ marginBottom: "1.5rem" }}>
           <AnalyticsSummaryPanel />
         </div>
 
-        <div className="dashboard-grid">
+        <div className="dashboard-grid single-module-view">
           <section className="column">
             <ModuleCard
               id="cases-module"
+              hidden={activeModule !== "cases"}
               title="Health Cases Tracker"
               description="Reported student incidents requiring clinical assessment or confirmation"
             >
@@ -117,6 +97,7 @@ export default function HealthAdminDashboard() {
               ) : cases.length === 0 ? (
                 <p className="text-muted">No health cases reported.</p>
               ) : (
+                <div className="admin-list-scroll health-cases-scroll" aria-label="Scrollable health cases list">
                 <table className="data-table">
                   <thead>
                     <tr>
@@ -175,28 +156,29 @@ export default function HealthAdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </ModuleCard>
 
             {selectedBreakdownCaseId && (
-              <div id="risk-breakdown-module">
+              <div id="risk-breakdown-module" hidden={activeModule !== "cases"}>
                 <RiskBreakdownView caseId={selectedBreakdownCaseId} />
               </div>
             )}
 
-            <div id="contact-graph-module">
+            <div id="contact-graph-module" hidden={activeModule !== "contact-graph"}>
               <NetworkGraphView cases={cases} />
             </div>
           </section>
 
           <section className="column">
-            <div id="capacity-module">
+            <div id="capacity-module" hidden={activeModule !== "capacity"}>
               <CapacityView />
             </div>
-            <div id="priority-queue-module">
+            <div id="priority-queue-module" hidden={activeModule !== "priority-queue"}>
               <PriorityQueueView />
             </div>
-            <div id="disease-kb-module">
+            <div id="disease-kb-module" hidden={activeModule !== "disease-kb"}>
               <DiseaseKBEditor />
             </div>
           </section>

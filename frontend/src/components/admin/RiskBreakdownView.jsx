@@ -102,6 +102,7 @@ export default function RiskBreakdownView({ caseId }) {
           {contacts.length === 0 ? (
             <p className="text-muted">No traced contacts recorded for Case #{caseId}.</p>
           ) : (
+            <div className="admin-list-scroll risk-breakdown-scroll" aria-label="Scrollable contact risk breakdown">
             <table className="data-table risk-breakdown-table">
               <thead>
                 <tr>
@@ -193,6 +194,7 @@ export default function RiskBreakdownView({ caseId }) {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </>
       )}

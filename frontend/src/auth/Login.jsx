@@ -57,26 +57,21 @@ export default function Login() {
     <div className="auth-page">
       {/* Left brand panel */}
       <div className="auth-brand-panel">
-        <div className="auth-brand-emblem">🏛️</div>
         <h1 className="auth-brand-name">CampusTrace</h1>
         <p className="auth-brand-tagline">
           Integrated health surveillance and contact-tracing for modern campuses.
         </p>
         <div className="auth-brand-features">
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">🔒</span>
             Role-based secure access
           </div>
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">🕸️</span>
             Real-time contact graph tracing
           </div>
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">📊</span>
             Outbreak analytics & KPIs
           </div>
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">🏥</span>
             Isolation capacity management
           </div>
         </div>
@@ -86,7 +81,6 @@ export default function Login() {
       <div className="auth-form-panel">
         <form className="auth-card" onSubmit={handleSubmit}>
           <div className="auth-card-header">
-            <div className="auth-card-logo">🏛️</div>
             <h1>Sign in to CampusTrace</h1>
             <p className="auth-card-subtitle">Enter your institutional credentials to continue.</p>
           </div>
@@ -118,7 +112,7 @@ export default function Login() {
 
           {error && (
             <p className="auth-error" role="alert">
-              ⚠ {error}
+              {error}
             </p>
           )}
 

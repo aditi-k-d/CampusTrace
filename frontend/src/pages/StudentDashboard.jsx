@@ -18,6 +18,7 @@ export default function StudentDashboard() {
   const [healthRecords, setHealthRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeModule, setActiveModule] = useState("courses");
 
   async function loadDashboardData() {
     setLoading(true);
@@ -51,6 +52,10 @@ export default function StudentDashboard() {
     loadDashboardData();
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeModule]);
+
   function handleLogout() {
     clearSession();
     navigate("/login");
@@ -60,50 +65,17 @@ export default function StudentDashboard() {
     <DashboardShell
       title="Student Portal"
       subtitle="Undergraduate & Graduate Academic and Health Intranet"
+      activeNav={activeModule}
+      onNavClick={setActiveModule}
       error={error}
       onLogout={handleLogout}
     >
       <div className="student-dashboard-page" style={{ padding: 0, minHeight: "auto", background: "transparent" }}>
-        {/* Card-based Module Entry Points */}
-        <div className="module-entry-grid">
-          <ModuleCard
-            title="Enrolled Courses"
-            description="View registered courses, lab batches, and tutorial sections"
-            badge={`${courses.length} Courses`}
-            badgeType="primary"
-            actionText="Go to Courses →"
-            href="#courses-module"
-          />
-          <ModuleCard
-            title="Health Self-Report"
-            description="Confidential self-reporting for symptom onset and clinical assessment"
-            badge="Health Action"
-            badgeType="warning"
-            actionText="Submit Health Report →"
-            href="#self-report-module"
-          />
-          <ModuleCard
-            title="Exposure Alerts"
-            description="Confidential exposure notifications and recommended preventive actions"
-            badge={alerts.length > 0 ? `${alerts.length} Active` : "Clear"}
-            badgeType={alerts.length > 0 ? "warning" : "success"}
-            actionText="View Exposure Alerts →"
-            href="#exposure-alerts-module"
-          />
-          <ModuleCard
-            title="Symptom Triage"
-            description="Evaluate symptoms against the campus Disease Knowledge Base"
-            badge="Assessment"
-            badgeType="primary"
-            actionText="Run Triage →"
-            href="#self-assessment-module"
-          />
-        </div>
-
-        <div className="dashboard-grid">
+        <div className="dashboard-grid single-module-view">
           <section className="column">
             <ModuleCard
               id="courses-module"
+              hidden={activeModule !== "courses"}
               title="My Enrolled Courses"
               description="Current academic term registrations and assigned practical batches"
             >
@@ -128,12 +100,13 @@ export default function StudentDashboard() {
               )}
             </ModuleCard>
 
-            <div id="self-report-module">
+            <div id="self-report-module" hidden={activeModule !== "self-report"}>
               <SelfReportForm onReportSubmitted={loadDashboardData} />
             </div>
 
             <ModuleCard
               id="health-history-module"
+              hidden={activeModule !== "health-history"}
               title="My Health Status & History"
               description="Historical log of reported health events and institutional confirmation"
             >
@@ -160,7 +133,7 @@ export default function StudentDashboard() {
               )}
             </ModuleCard>
 
-            <div id="absence-responses-module">
+            <div id="absence-responses-module" hidden={activeModule !== "absence-responses"}>
               <AbsenceFlagResponse />
             </div>
           </section>
@@ -168,6 +141,7 @@ export default function StudentDashboard() {
           <section className="column">
             <ModuleCard
               id="exposure-alerts-module"
+              hidden={activeModule !== "exposure-alerts"}
               title={`Exposure Alerts (${alerts.length})`}
               description="Private exposure notices; does not disclose identity of contact sources"
             >
@@ -184,7 +158,7 @@ export default function StudentDashboard() {
               )}
             </ModuleCard>
 
-            <div id="self-assessment-module">
+            <div id="self-assessment-module" hidden={activeModule !== "self-assessment"}>
               <SelfAssessment />
             </div>
           </section>

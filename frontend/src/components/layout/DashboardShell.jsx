@@ -62,12 +62,12 @@ export default function DashboardShell({
           {/* Banners */}
           {error && (
             <div className="banner-error" role="alert">
-              ⚠ {error}
+              {error}
             </div>
           )}
           {bannerMsg && (
             <div className="banner-success" role="status">
-              ✓ {bannerMsg}
+              {bannerMsg}
             </div>
           )}
 

@@ -55,7 +55,7 @@ export default function AuditLogViewer() {
           <label htmlFor="filter-user">User ID</label>
           <input
             id="filter-user"
-            type="number"
+            type="text"
             placeholder="User ID"
             value={filterUser}
             onChange={(e) => setFilterUser(e.target.value)}
@@ -85,7 +85,7 @@ export default function AuditLogViewer() {
       ) : logs.length === 0 ? (
         <p className="text-muted">No audit log entries found matching filters.</p>
       ) : (
-        <div className="audit-log-box">
+        <div className="audit-log-box admin-list-scroll">
           <table className="data-table">
             <thead>
               <tr>
@@ -123,3 +123,4 @@ export default function AuditLogViewer() {
     </div>
   );
 }
+

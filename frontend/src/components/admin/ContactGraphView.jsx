@@ -60,7 +60,7 @@ export default function ContactGraphView() {
           <label htmlFor="case-id">Health Record (Case) ID</label>
           <input
             id="case-id"
-            type="number"
+            type="text"
             placeholder="Case ID"
             value={caseId}
             onChange={(e) => setCaseId(e.target.value)}
@@ -85,7 +85,7 @@ export default function ContactGraphView() {
           <label htmlFor="depth-select">Max Depth</label>
           <input
             id="depth-select"
-            type="number"
+            type="text"
             min="1"
             max="5"
             value={maxDepth}
@@ -147,3 +147,4 @@ export default function ContactGraphView() {
     </div>
   );
 }
+

@@ -48,7 +48,6 @@ export default function TopBar({ onLogout, user: propUser, portalTitle }) {
       {/* Left: breadcrumb */}
       <div className="portal-topbar-left">
         <div className="portal-institution-badge">
-          <span aria-hidden="true">🏛️</span>
           <span>CampusTrace</span>
           {portalTitle && (
             <>
@@ -69,7 +68,7 @@ export default function TopBar({ onLogout, user: propUser, portalTitle }) {
           aria-label="Notifications"
           onClick={() => {/* placeholder */}}
         >
-          🔔
+          <span className="notification-indicator" aria-hidden="true" />
         </button>
 
         {/* User profile block */}
@@ -94,7 +93,7 @@ export default function TopBar({ onLogout, user: propUser, portalTitle }) {
           onClick={handleLogoutClick}
           title="Sign out of your session"
         >
-          ↪ Sign Out
+          Sign Out
         </button>
       </div>
     </header>

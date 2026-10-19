@@ -14,6 +14,7 @@ export default function FacultyDashboard() {
   const [flags, setFlags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeModule, setActiveModule] = useState("attendance");
 
   async function loadFlags() {
     setLoading(true);
@@ -32,6 +33,10 @@ export default function FacultyDashboard() {
     loadFlags();
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeModule]);
+
   function handleLogout() {
     clearSession();
     navigate("/login");
@@ -41,52 +46,27 @@ export default function FacultyDashboard() {
     <DashboardShell
       title="Course Faculty Portal"
       subtitle="Course Session Attendance Management & Health Surveillance"
+      activeNav={activeModule}
+      onNavClick={setActiveModule}
       error={error}
       onLogout={handleLogout}
     >
       <div className="faculty-dashboard-page" style={{ padding: 0, minHeight: "auto", background: "transparent" }}>
-        {/* Card-based Module Entry Points */}
-        <div className="module-entry-grid">
-          <ModuleCard
-            title="Attendance & Health Summary"
-            description="Track course session attendance and aggregate health statistics"
-            badge="Attendance"
-            badgeType="primary"
-            actionText="View Attendance →"
-            href="#attendance-module"
-          />
-          <ModuleCard
-            title="Flag Student Absence"
-            description="Observe and flag student absences for health surveillance follow-up"
-            badge="Action"
-            badgeType="warning"
-            actionText="Flag Absence →"
-            href="#absence-flag-module"
-          />
-          <ModuleCard
-            title="Absence Flags Raised"
-            description="Review raised flags, categorized reasons, and escalation status"
-            badge={`${flags.length} Flags`}
-            badgeType={flags.length > 0 ? "warning" : "success"}
-            actionText="Review Flags →"
-            href="#raised-flags-module"
-          />
-        </div>
-
-        <div className="dashboard-grid">
+        <div className="dashboard-grid single-module-view">
           <section className="column">
-            <div id="attendance-module">
+            <div id="attendance-module" hidden={activeModule !== "attendance"}>
               <AttendanceView />
             </div>
           </section>
 
           <section className="column">
-            <div id="absence-flag-module">
+            <div id="absence-flag-module" hidden={activeModule !== "flag-absence"}>
               <AbsenceFlagForm onFlagCreated={loadFlags} />
             </div>
 
             <ModuleCard
               id="raised-flags-module"
+              hidden={activeModule !== "raised-flags"}
               title={`Absence Flags Raised (${flags.length})`}
               description="Log of student absence flags submitted for your assigned courses"
             >

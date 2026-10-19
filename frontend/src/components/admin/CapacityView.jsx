@@ -47,10 +47,10 @@ export default function CapacityView() {
     try {
       const res = await allocateBed(
         selectedFacilityId,
-        targetUserId ? Number(targetUserId) : null
+        targetUserId ? targetUserId : null
       );
       setMessage(
-        `Bed allocated successfully (Bed #${res.allocated_bed_number} for User #${res.allocated_user_id}).`
+        `Bed allocated successfully for User #${res.user_id}.`
       );
       setTargetUserId("");
       loadCapacity();
@@ -113,7 +113,7 @@ export default function CapacityView() {
             <label htmlFor="user-id-input">User ID (Optional - Auto-selects highest risk if blank)</label>
             <input
               id="user-id-input"
-              type="number"
+              type="text"
               placeholder="Enter User ID or leave blank"
               value={targetUserId}
               onChange={(e) => setTargetUserId(e.target.value)}
@@ -123,7 +123,7 @@ export default function CapacityView() {
           {error && <p className="error-text" role="alert">{error}</p>}
           {message && <p className="success-text">{message}</p>}
 
-          <button type="submit" disabled={allocating}>
+          <button type="submit" disabled={allocating || facilities.length === 0}>
             {allocating ? "Allocating..." : "Allocate Bed"}
           </button>
         </form>
@@ -131,3 +131,4 @@ export default function CapacityView() {
     </div>
   );
 }
+

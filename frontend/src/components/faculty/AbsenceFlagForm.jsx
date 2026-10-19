@@ -25,8 +25,8 @@ export default function AbsenceFlagForm({ defaultCourseId, onFlagCreated }) {
     setSubmitting(true);
     try {
       const result = await createAbsenceFlag({
-        student_id: Number(studentId),
-        course_id: Number(courseId),
+        student_id: studentId,
+        course_id: courseId,
         flagged_date: flaggedDate,
         reason_category: reasonCategory,
       });
@@ -56,7 +56,7 @@ export default function AbsenceFlagForm({ defaultCourseId, onFlagCreated }) {
           <label htmlFor="student-id">Student ID</label>
           <input
             id="student-id"
-            type="number"
+            type="text"
             placeholder="Enter Student User ID"
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
@@ -68,7 +68,7 @@ export default function AbsenceFlagForm({ defaultCourseId, onFlagCreated }) {
           <label htmlFor="course-id">Course ID</label>
           <input
             id="course-id"
-            type="number"
+            type="text"
             placeholder="Enter Course ID"
             value={courseId}
             onChange={(e) => setCourseId(e.target.value)}
@@ -111,3 +111,4 @@ export default function AbsenceFlagForm({ defaultCourseId, onFlagCreated }) {
     </div>
   );
 }
+

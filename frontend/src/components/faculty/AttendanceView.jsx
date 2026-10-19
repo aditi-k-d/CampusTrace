@@ -44,7 +44,7 @@ export default function AttendanceView({ courseId }) {
           <label htmlFor="select-course">Course ID</label>
           <input
             id="select-course"
-            type="number"
+            type="text"
             placeholder="Course ID"
             value={selectedCourseId}
             onChange={(e) => setSelectedCourseId(e.target.value)}
@@ -127,3 +127,4 @@ export default function AttendanceView({ courseId }) {
     </div>
   );
 }
+

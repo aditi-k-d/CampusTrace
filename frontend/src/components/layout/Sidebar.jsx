@@ -3,38 +3,37 @@ import { getUser } from "../../auth/authStorage";
 
 const ROLE_NAV_CONFIG = {
   student: [
-    { id: "courses", label: "Enrolled Courses", icon: "📚", href: "#courses-module" },
-    { id: "self-report", label: "Health Self-Report", icon: "🩺", href: "#self-report-module" },
-    { id: "health-history", label: "Health Status & History", icon: "📋", href: "#health-history-module" },
-    { id: "exposure-alerts", label: "Exposure Alerts", icon: "🔔", href: "#exposure-alerts-module" },
-    { id: "self-assessment", label: "Symptom Self-Assessment", icon: "🩹", href: "#self-assessment-module" },
-    { id: "absence-responses", label: "Absence Observations", icon: "⚠️", href: "#absence-responses-module" },
+    { id: "courses", label: "Enrolled Courses", href: "#courses-module" },
+    { id: "self-report", label: "Health Self-Report", href: "#self-report-module" },
+    { id: "health-history", label: "Health Status & History", href: "#health-history-module" },
+    { id: "exposure-alerts", label: "Exposure Alerts", href: "#exposure-alerts-module" },
+    { id: "self-assessment", label: "Symptom Self-Assessment", href: "#self-assessment-module" },
+    { id: "absence-responses", label: "Absence Observations", href: "#absence-responses-module" },
   ],
   course_faculty: [
-    { id: "attendance", label: "Attendance & Health", icon: "👥", href: "#attendance-module" },
-    { id: "flag-absence", label: "Flag Student Absence", icon: "🚩", href: "#absence-flag-module" },
-    { id: "raised-flags", label: "Absence Flags Raised", icon: "📑", href: "#raised-flags-module" },
+    { id: "attendance", label: "Attendance & Health", href: "#attendance-module" },
+    { id: "flag-absence", label: "Flag Student Absence", href: "#absence-flag-module" },
+    { id: "raised-flags", label: "Absence Flags Raised", href: "#raised-flags-module" },
   ],
   class_teacher: [
-    { id: "division", label: "Division Overview", icon: "🏫", href: "#division-module" },
-    { id: "escalations", label: "Absence Escalations", icon: "📈", href: "#escalations-module" },
-    { id: "approvals", label: "Enrollment Approvals", icon: "✅", href: "#approvals-module" },
+    { id: "division", label: "Division Overview", href: "#division-module" },
+    { id: "escalations", label: "Absence Escalations", href: "#escalations-module" },
+    { id: "approvals", label: "Enrollment Approvals", href: "#approvals-module" },
   ],
   health_admin: [
-    { id: "cases", label: "Cases Tracker", icon: "📊", href: "#cases-module" },
-    { id: "analytics", label: "Analytics Summary", icon: "📉", href: "#analytics-summary-module" },
-    { id: "contact-graph", label: "Contact Graph Tracing", icon: "🕸️", href: "#contact-graph-module" },
-    { id: "risk-breakdown", label: "Risk Breakdown", icon: "⚖️", href: "#risk-breakdown-module" },
-    { id: "capacity", label: "Isolation Capacity", icon: "🏥", href: "#capacity-module" },
-    { id: "priority-queue", label: "Priority Queue", icon: "📌", href: "#priority-queue-module" },
-    { id: "disease-kb", label: "Disease Knowledge Base", icon: "📖", href: "#disease-kb-module" },
+    { id: "cases", label: "Cases Tracker", href: "#cases-module" },
+    { id: "analytics", label: "Analytics Summary", href: "#analytics-summary-module" },
+    { id: "contact-graph", label: "Contact Graph Tracing", href: "#contact-graph-module" },
+    { id: "capacity", label: "Isolation Capacity", href: "#capacity-module" },
+    { id: "priority-queue", label: "Priority Queue", href: "#priority-queue-module" },
+    { id: "disease-kb", label: "Disease Knowledge Base", href: "#disease-kb-module" },
   ],
   institute_admin: [
-    { id: "analytics", label: "Aggregated Analytics", icon: "📊", href: "#analytics" },
-    { id: "structure", label: "Structure & Timetables", icon: "🏛️", href: "#structure" },
-    { id: "users", label: "User Role Management", icon: "👤", href: "#users" },
-    { id: "config", label: "System Configuration", icon: "⚙️", href: "#config" },
-    { id: "audit", label: "Audit Log Viewer", icon: "📜", href: "#audit" },
+    { id: "analytics", label: "Aggregated Analytics" },
+    { id: "structure", label: "Structure & Timetables" },
+    { id: "users", label: "User Role Management" },
+    { id: "config", label: "System Configuration" },
+    { id: "audit", label: "Audit Log Viewer" },
   ],
 };
 
@@ -78,7 +77,6 @@ export default function Sidebar({
     <aside className="portal-sidebar" aria-label="Portal Navigation">
       {/* Brand */}
       <div className="portal-sidebar-brand">
-        <div className="portal-brand-emblem" aria-hidden="true">🏛️</div>
         <div>
           <h2 className="portal-brand-title">CampusTrace</h2>
           <p className="portal-brand-subtitle">University Intranet</p>
@@ -118,7 +116,6 @@ export default function Sidebar({
               onClick={(e) => handleItemClick(e, item)}
               title={item.label}
             >
-              <span className="portal-nav-icon" aria-hidden="true">{item.icon || "•"}</span>
               <span className="portal-nav-label">{item.label}</span>
             </button>
           );

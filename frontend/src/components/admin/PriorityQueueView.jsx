@@ -39,6 +39,7 @@ export default function PriorityQueueView() {
       ) : queue.length === 0 ? (
         <p className="text-muted" style={{ marginTop: "0.75rem" }}>No contacts currently waiting in priority queue.</p>
       ) : (
+        <div className="admin-list-scroll">
         <table className="data-table priority-queue-table">
           <thead>
             <tr>
@@ -109,6 +110,7 @@ export default function PriorityQueueView() {
             })}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

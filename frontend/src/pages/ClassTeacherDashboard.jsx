@@ -21,6 +21,7 @@ export default function ClassTeacherDashboard() {
   const [approveError, setApproveError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeModule, setActiveModule] = useState("division");
 
   async function loadDashboardData() {
     setLoading(true);
@@ -43,6 +44,10 @@ export default function ClassTeacherDashboard() {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeModule]);
 
   async function handleApprove(e) {
     e.preventDefault();
@@ -72,42 +77,17 @@ export default function ClassTeacherDashboard() {
     <DashboardShell
       title="Class Teacher Portal"
       subtitle="Division-Wide Attendance Monitoring & Enrollment Adjustments"
+      activeNav={activeModule}
+      onNavClick={setActiveModule}
       error={error}
       onLogout={handleLogout}
     >
       <div className="faculty-dashboard-page" style={{ padding: 0, minHeight: "auto", background: "transparent" }}>
-        {/* Card-based Module Entry Points */}
-        <div className="module-entry-grid">
-          <ModuleCard
-            title="Division Overview"
-            description="Course attendance and presence pattern summary across your division"
-            badge={divisionData ? `${divisionData.total_students} Students` : "Division"}
-            badgeType="primary"
-            actionText="View Overview →"
-            href="#division-module"
-          />
-          <ModuleCard
-            title="Absence Escalations"
-            description={`Multi-course absence detection over a rolling ${rollingWindowDays}-day surveillance window`}
-            badge={`${escalations.length} Detected`}
-            badgeType={escalations.length > 0 ? "warning" : "success"}
-            actionText="Review Escalations →"
-            href="#escalations-module"
-          />
-          <ModuleCard
-            title="Enrollment Approvals"
-            description="Approve cross-division elective enrollments and laboratory batch transfers"
-            badge="Administration"
-            badgeType="primary"
-            actionText="Approve Transfers →"
-            href="#approvals-module"
-          />
-        </div>
-
-        <div className="dashboard-grid">
+        <div className="dashboard-grid single-module-view">
           <section className="column">
             <ModuleCard
               id="division-module"
+              hidden={activeModule !== "division"}
               title="Division Overview"
               description="Division-wide attendance and course flag summary"
             >
@@ -150,6 +130,7 @@ export default function ClassTeacherDashboard() {
           <section className="column">
             <ModuleCard
               id="escalations-module"
+              hidden={activeModule !== "escalations"}
               title={`Absence Escalations (${escalations.length})`}
               subtitle={`Students showing cross-course absence patterns in the last ${rollingWindowDays} days.`}
             >
@@ -173,6 +154,7 @@ export default function ClassTeacherDashboard() {
 
             <ModuleCard
               id="approvals-module"
+              hidden={activeModule !== "approvals"}
               title="Approve Enrollment Change"
               description="Authorize elective changes and student transfers"
             >
@@ -181,7 +163,7 @@ export default function ClassTeacherDashboard() {
                   <label htmlFor="enrollment-id">Enrollment ID</label>
                   <input
                     id="enrollment-id"
-                    type="number"
+                    type="text"
                     placeholder="Enter Enrollment ID"
                     value={enrollmentInputId}
                     onChange={(e) => setEnrollmentInputId(e.target.value)}
@@ -200,3 +182,4 @@ export default function ClassTeacherDashboard() {
     </DashboardShell>
   );
 }
+

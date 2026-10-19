@@ -116,8 +116,7 @@ describe("Admin Components", () => {
       adminApi.allocateBed.mockResolvedValueOnce({
         id: 1,
         capacity_id: 1,
-        allocated_user_id: 102,
-        allocated_bed_number: 6,
+        user_id: 102,
       });
 
       render(<CapacityView />);
@@ -131,7 +130,7 @@ describe("Admin Components", () => {
 
       await waitFor(() => {
         expect(adminApi.allocateBed).toHaveBeenCalledWith(1, null);
-        expect(screen.getByText(/bed allocated successfully/i)).toBeInTheDocument();
+        expect(screen.getByText("Bed allocated successfully for User #102.")).toBeInTheDocument();
       });
     });
   });

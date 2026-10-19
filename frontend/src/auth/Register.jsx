@@ -43,26 +43,21 @@ export default function Register() {
     <div className="auth-page">
       {/* Left brand panel */}
       <div className="auth-brand-panel">
-        <div className="auth-brand-emblem">🏛️</div>
         <h1 className="auth-brand-name">Join CampusTrace</h1>
         <p className="auth-brand-tagline">
           Create your student account to access health services, course tracking, and exposure alerts.
         </p>
         <div className="auth-brand-features">
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">📚</span>
             Course enrollment & batch management
           </div>
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">🩺</span>
             Confidential health self-reporting
           </div>
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">🔔</span>
             Private exposure alert notifications
           </div>
           <div className="auth-brand-feature">
-            <span className="auth-brand-feature-icon">🩹</span>
             Symptom triage & assessment tools
           </div>
         </div>
@@ -72,7 +67,6 @@ export default function Register() {
       <div className="auth-form-panel">
         <form className="auth-card" onSubmit={handleSubmit}>
           <div className="auth-card-header">
-            <div className="auth-card-logo">🏛️</div>
             <h1>Create your account</h1>
             <p className="auth-card-subtitle">Student self-registration — institutional credentials only.</p>
           </div>
@@ -118,7 +112,7 @@ export default function Register() {
             <label htmlFor="division">Division ID</label>
             <input
               id="division"
-              type="number"
+              type="text"
               value={divisionId}
               onChange={(e) => setDivisionId(e.target.value)}
               required
@@ -128,7 +122,7 @@ export default function Register() {
 
           {error && (
             <p className="auth-error" role="alert">
-              ⚠ {error}
+              {error}
             </p>
           )}
 
@@ -144,3 +138,4 @@ export default function Register() {
     </div>
   );
 }
+

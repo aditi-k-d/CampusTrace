@@ -10,6 +10,33 @@
   background: transparent;
 }
 
+/* Keep long admin lists inside their module instead of stretching the page. */
+.admin-list-scroll {
+  max-height: 360px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  scrollbar-gutter: stable;
+}
+
+.admin-list-scroll .data-table {
+  margin: 0;
+  min-width: 100%;
+}
+
+.admin-list-scroll .data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8fafc;
+}
+
+.health-cases-scroll { max-height: 330px; }
+.risk-breakdown-scroll { max-height: 380px; }
+.users-list-scroll { max-height: 520px; }
+#risk-breakdown-module { scroll-margin-top: 1rem; }
+
 /* ---- Analytics Summary Panel ---- */
 .analytics-summary-panel > h2 { margin-bottom: 0.25rem; }
 

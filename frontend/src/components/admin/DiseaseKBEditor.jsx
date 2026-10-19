@@ -134,7 +134,7 @@ export default function DiseaseKBEditor() {
           <label htmlFor="kb-incubation">Incubation Period (Days)</label>
           <input
             id="kb-incubation"
-            type="number"
+            type="text"
             value={incubationDays}
             onChange={(e) => setIncubationDays(e.target.value)}
             required
@@ -163,6 +163,7 @@ export default function DiseaseKBEditor() {
         ) : entries.length === 0 ? (
           <p className="text-muted">No disease knowledge base entries found.</p>
         ) : (
+          <div className="admin-list-scroll">
           <table className="data-table">
             <thead>
               <tr>
@@ -192,8 +193,10 @@ export default function DiseaseKBEditor() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
   );
 }
+
